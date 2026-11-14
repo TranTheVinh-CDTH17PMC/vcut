@@ -47,6 +47,7 @@ const EXAMPLES = [
 export function ClaudeModal({ onClose, toast }: { onClose: () => void; toast: (t: string, e?: boolean) => void }) {
   const [st, setSt] = useState<ClaudeStatus | null>(null);
   const [busy, setBusy] = useState(false);
+  const [ext, setExt] = useState<{ path: string; opened: boolean } | null>(null);
   useEffect(() => {
     api.claudeStatus().then(setSt).catch((e) => toast(String(e), true));
   }, [toast]);
@@ -55,7 +56,14 @@ export function ClaudeModal({ onClose, toast }: { onClose: () => void; toast: (t
     setBusy(true);
     try {
       setSt(await api.claudeConnect());
-      toast("Đã thêm vlogcut vào Claude desktop. Hãy thoát hẳn rồi mở lại Claude desktop.");
+      // Cài thêm dạng tiện ích (.mcpb): cách chính thức, chạy cả với bản Microsoft Store.
+      const r = await api.claudeInstallExtension();
+      setExt(r);
+      toast(
+        r.opened
+          ? "Claude desktop đang hiện hộp thoại cài vlogcut: bấm Install."
+          : "Đã chọn sẵn file vlogcut.mcpb: kéo nó vào Claude desktop > Settings > Desktop app > Extensions.",
+      );
     } catch (e) {
       toast(String(e), true);
     } finally {
@@ -77,7 +85,19 @@ export function ClaudeModal({ onClose, toast }: { onClose: () => void; toast: (t
             Bấm <b>Kết nối</b> bên dưới. {st?.configured && <span style={{ color: "#34A574" }}>Đã kết nối ✓</span>}
           </li>
           <li>
-            <b>Thoát hẳn</b> Claude desktop (chuột phải icon Claude ở khay hệ thống, chọn Quit) rồi mở lại.
+            Claude desktop hiện hộp thoại cài tiện ích <b>vlogcut</b>: bấm <b>Install</b>. Nếu không thấy hộp thoại, mở Claude desktop &gt;{" "}
+            <b>Settings &gt; Desktop app &gt; Extensions</b> rồi kéo file <code>vlogcut.mcpb</code> vào đó.
+            {ext && (
+              <>
+                {" "}
+                <a href="#" onClick={(e) => (e.preventDefault(), api.claudeReveal(ext.path))}>
+                  Mở thư mục chứa file
+                </a>
+              </>
+            )}
+          </li>
+          <li>
+            Kiểm tra: trong trang Extensions có <b>vlogcut</b> đang bật. Lần đầu Claude hỏi quyền dùng công cụ, chọn <b>Allow always</b>.
           </li>
           <li>Mở một cuộc trò chuyện mới trong Claude desktop và gõ yêu cầu, ví dụ:</li>
         </ol>

@@ -124,7 +124,7 @@ App ghi `%APPDATA%/vlogcut/current.json` trỏ tới project đang mở để MC
 - Hướng dẫn dùng + tham chiếu Op nằm trong `INSTRUCTIONS` của server (crates/mcp/src/main.rs).
 - App và MCP là hai tiến trình cùng ghi project.json: mọi hàm ghi trong `store` lấy khoá file `.vlogcut/write.lock`.
 - MCP ghi `%APPDATA%/vlogcut/mcp-status.json` mỗi lần được gọi; app đọc để hiện trạng thái.
-- Nút "Kết nối Claude" trong app chép `vlogcut-mcp.exe` sang `%APPDATA%/vlogcut/bin/` (tránh khoá file khi build lại) và thêm mục `vlogcut` vào `claude_desktop_config.json` (giữ các server khác, lưu `.bak`).
+- Nút "Kết nối Claude" trong app chép `vlogcut-mcp.exe` sang `%APPDATA%/vlogcut/bin/` (tránh khoá file khi build lại) và thêm mục `vlogcut` vào `claude_desktop_config.json` (giữ các server khác, lưu `.bak`). Đồng thời tạo tiện ích `%APPDATA%/vlogcut/vlogcut.mcpb` (manifest `binary`, lệnh trỏ về bản trong `bin` để deploy cập nhật được) và mở nó → Claude desktop hiện hộp thoại Install. Cần thiết với Claude bản Microsoft Store (đọc cấu hình trong thư mục gói). MCP ghi nhịp tim cả vào `<project>/.vlogcut/mcp-status.json`.
 
 Keyframe đi qua cùng các tool trên bằng Op `SetKeyframes`, nên ngay từ bản 1 Claude đã làm được "zoom chậm vào từ giây 2 đến 4", "nhạc nhỏ dần ở cuối"… dù UI chưa có công cụ chỉnh keyframe. Mô tả tool phải ghi rõ `t` tính từ đầu clip.
 

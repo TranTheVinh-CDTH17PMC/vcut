@@ -474,6 +474,18 @@ async fn claude_open() -> CmdResult<bool> {
     blocking(|| Ok(claude::open_app())).await
 }
 
+/// Tạo và mở tiện ích vlogcut.mcpb cho Claude desktop.
+#[tauri::command]
+async fn claude_install_extension() -> CmdResult<claude::ExtensionResult> {
+    blocking(claude::install_extension).await
+}
+
+/// Chọn sẵn file trong Explorer.
+#[tauri::command]
+fn claude_reveal(path: String) {
+    claude::reveal(std::path::Path::new(&path));
+}
+
 /// Có bản cài mới hơn bản đang chạy không (sau khi deploy.ps1 cập nhật).
 #[tauri::command]
 fn update_check() -> bool {
@@ -558,6 +570,8 @@ fn main() {
             claude_connect,
             claude_open,
             claude_open_chat,
+            claude_install_extension,
+            claude_reveal,
             update_check,
             update_restart,
             claude_message_dismiss,

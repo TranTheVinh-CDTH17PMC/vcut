@@ -202,6 +202,7 @@ vlogcut có một MCP server (`vlogcut-mcp.exe`) để Claude desktop đọc và
 
 1. Trong vlogcut, bấm chip **Kết nối Claude** (góc trên bên phải) → **Kết nối**.
    App chép `vlogcut-mcp.exe` sang `%APPDATA%\vlogcut\bin\` và thêm mục `vlogcut` vào `claude_desktop_config.json` (giữ nguyên các server khác, có lưu bản `.bak`).
+   Sau đó Claude desktop hiện hộp thoại cài tiện ích **vlogcut**: bấm **Install**. Không thấy hộp thoại thì kéo file `vlogcut.mcpb` (app chọn sẵn trong Explorer) vào Claude desktop → **Settings → Desktop app → Extensions**.
 2. **Thoát hẳn** Claude desktop (chuột phải icon ở khay hệ thống → Quit) rồi mở lại.
 3. Chip chuyển sang trạng thái đã kết nối sau lần đầu Claude gọi công cụ.
 

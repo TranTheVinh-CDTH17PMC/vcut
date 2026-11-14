@@ -195,9 +195,15 @@ fn parse_ops(raw: &[Value]) -> Result<Vec<ops::Op>, ErrorData> {
 
 /// Ghi lại lần Claude dùng tool gần nhất, để app hiện "Claude đã kết nối".
 fn heartbeat(tool: &str) {
-    if let Some(dir) = dirs_status_path() {
-        let now = vlogcut_core::media::iso_utc(std::time::SystemTime::now());
-        let _ = store::write_json_atomic(&dir, &json!({ "last_call": now, "tool": tool, "pid": std::process::id() }));
+    let now = vlogcut_core::media::iso_utc(std::time::SystemTime::now());
+    let body = json!({ "last_call": now, "tool": tool, "pid": std::process::id() });
+    if let Some(path) = dirs_status_path() {
+        let _ = store::write_json_atomic(&path, &body);
+    }
+    // Ghi thêm vào thư mục project: Claude desktop bản Microsoft Store chạy server này
+    // trong "hộp" riêng, file ghi vào %APPDATA% có thể bị chuyển hướng nên app không thấy.
+    if let Some(dir) = store::get_current() {
+        let _ = store::write_json_atomic(&dir.join(".vlogcut").join("mcp-status.json"), &body);
     }
 }
 
