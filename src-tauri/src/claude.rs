@@ -33,9 +33,7 @@ pub struct ClaudeStatus {
 /// Bản cài từ Microsoft Store lưu trong thư mục ảo hoá của gói ứng dụng.
 fn config_candidates() -> Vec<PathBuf> {
     let mut v = Vec::new();
-    if let Some(d) = dirs::config_dir() {
-        v.push(d.join("Claude").join("claude_desktop_config.json"));
-    }
+    // Bản Microsoft Store đứng trước để hộp thoại hiện đúng file Claude thực sự đọc.
     if let Some(local) = dirs::data_local_dir() {
         if let Ok(rd) = std::fs::read_dir(local.join("Packages")) {
             for e in rd.flatten() {
@@ -46,14 +44,22 @@ fn config_candidates() -> Vec<PathBuf> {
             }
         }
     }
+    if let Some(d) = dirs::config_dir() {
+        v.push(d.join("Claude").join("claude_desktop_config.json"));
+    }
     v
 }
 
 /// File cấu hình đang tồn tại; nếu chưa có thì dùng vị trí chuẩn.
+/// Các file cấu hình cần ghi.
+///
+/// Claude desktop bản Microsoft Store (MSIX) chạy trong "hộp" riêng: nó đọc
+/// `%LOCALAPPDATA%\Packages\Claude_xxx\LocalCache\Roaming\Claude\...` chứ không đọc
+/// `%APPDATA%\Claude\...`, và thư mục trong hộp có thể chưa tồn tại. Vì vậy với mỗi
+/// gói Claude tìm thấy, ta luôn ghi vào hộp (tự tạo thư mục), đồng thời ghi cả bản
+/// thường cho chắc — ghi thừa một file không ảnh hưởng gì.
 fn config_paths() -> Vec<PathBuf> {
-    let all = config_candidates();
-    let existing: Vec<PathBuf> = all.iter().filter(|p| p.exists() || p.parent().map(|d| d.exists()).unwrap_or(false)).cloned().collect();
-    if existing.is_empty() { all.into_iter().take(1).collect() } else { existing }
+    config_candidates()
 }
 
 /// vlogcut-mcp nằm cùng thư mục với file chạy của app.
@@ -72,7 +78,8 @@ fn read_config(path: &PathBuf) -> Value {
 
 pub fn status() -> ClaudeStatus {
     let paths = config_paths();
-    let configured = paths.iter().any(|p| read_config(p)["mcpServers"]["vlogcut"].is_object());
+    // Phải có ở mọi file: nếu chỉ một file có, có thể đó không phải file Claude đọc.
+    let configured = !paths.is_empty() && paths.iter().all(|p| read_config(p)["mcpServers"]["vlogcut"].is_object());
     let hb: Option<Value> = store::current_pointer_path().and_then(|p| store::read_json(&p.with_file_name("mcp-status.json")).ok());
     ClaudeStatus {
         configured,
