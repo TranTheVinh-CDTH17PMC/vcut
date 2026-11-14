@@ -1,0 +1,22 @@
+# Workspace: gom nhiều crate Rust vào một dự án, dùng chung thư mục build `target/`.
+[workspace]
+resolver = "2"
+members = ["crates/core", "crates/mcp", "src-tauri"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+
+# Phiên bản thư viện dùng chung cho mọi crate trong workspace.
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+uuid = { version = "1", features = ["v4"] }
+dirs = "6"
+
+[profile.release]
+# Bản phát hành: tối ưu kích thước file .exe
+lto = true
+codegen-units = 1
+strip = true

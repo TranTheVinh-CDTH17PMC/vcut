@@ -1,0 +1,23 @@
+[package]
+name = "vlogcut-app"
+version.workspace = true
+edition.workspace = true
+description = "App desktop vlogcut"
+
+[[bin]]
+name = "vlogcut"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+vlogcut-core = { path = "../crates/core" }
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+serde.workspace = true
+serde_json.workspace = true
+notify = "8"
+dirs.workspace = true
+ureq = "3"
+zip = { version = "9", default-features = false, features = ["deflate-flate2"] }
