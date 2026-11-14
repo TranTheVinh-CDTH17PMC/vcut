@@ -1,0 +1,17 @@
+[package]
+name = "vlogcut-core"
+version.workspace = true
+edition.workspace = true
+description = "Lõi vlogcut: model project, thao tác timeline, lưu trữ, media và render FFmpeg"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+dirs.workspace = true
+rayon = "1"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+
+[dev-dependencies]
+tempfile = "3"
