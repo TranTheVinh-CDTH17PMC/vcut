@@ -20,3 +20,11 @@ dirs = "6"
 lto = true
 codegen-units = 1
 strip = true
+
+# Bản cài trên máy (deploy.ps1): giống release nhưng build lại nhanh hơn
+# (không LTO, biên dịch song song, giữ cache incremental). File .exe to hơn chút.
+[profile.deploy]
+inherits = "release"
+lto = false
+codegen-units = 16
+incremental = true

@@ -154,4 +154,12 @@ Bản 2 thêm giao diện keyframe: hình thoi trên clip được chọn, kéo 
 
 Ý tưởng chặng 6–8 tham khảo từ các app dựng video AI khác (vd. H cut); chỉ lấy ý tưởng tính năng, giao diện và thương hiệu là của vlogcut.
 
+## Build & cập nhật app trên máy người dùng
+
+- `cai-dat-app.bat` (một lần): `deploy.ps1 -Open -Setup` → build profile `deploy` (release không LTO, incremental) với `--features custom-protocol`, cài vào `%LOCALAPPDATA%/Programs/vlogcut` (vlogcut.exe + vlogcut-mcp.exe), biểu tượng Desktop/Start, đặt `tu-dong-cap-nhat.ps1` vào Startup.
+- `tu-dong-cap-nhat.ps1` chạy nền, 5 s kiểm tra `.deploy-request` ở thư mục project → chạy `deploy.ps1`; ghi `deploy-watcher.txt` mỗi phút.
+- `deploy.ps1` đổi tên exe đang chạy thành `*.old-<ticks>.exe` rồi chép bản mới (cả bản MCP trong `%APPDATA%/vlogcut/bin`); kết quả ở `deploy-status.json` / `deploy-log.txt`. Script chỉ dùng ASCII (PowerShell 5.1).
+- App (`src-tauri/src/update.rs`) thấy `vlogcut.exe` mới hơn lúc khởi động → nút "Có bản mới · Mở lại".
+- **Quy trình của Claude sau khi code xong:** build + test trong container → push GitHub `main` → chép file đổi sang `D:\Project\vlogcut` → tạo `.deploy-request` → chờ `deploy-status.json` báo `ok`.
+
 Mỗi chặng kết thúc bằng thứ chạy được và build sạch (`cargo build`, `cargo test` cho core, `npm run build` cho ui).

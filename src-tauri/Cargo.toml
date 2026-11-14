@@ -21,3 +21,8 @@ notify = "8"
 dirs.workspace = true
 ureq = "3"
 zip = { version = "9", default-features = false, features = ["deflate-flate2"] }
+
+[features]
+# Nhúng giao diện (ui/dist) vào file .exe thay vì lấy từ máy chủ dev (localhost:5173).
+# `tauri build` tự bật; deploy.ps1 bật bằng `--features custom-protocol`.
+custom-protocol = ["tauri/custom-protocol"]

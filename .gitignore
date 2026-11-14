@@ -5,3 +5,7 @@ ui/dist/
 src-tauri/gen/
 *.tmp-*
 *.tsbuildinfo
+deploy-log.txt
+deploy-status.json
+deploy-watcher.txt
+.deploy-request

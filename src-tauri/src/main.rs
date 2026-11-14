@@ -8,6 +8,7 @@
 
 mod claude;
 mod speech_cmd;
+mod update;
 
 use notify::{RecursiveMode, Watcher};
 use serde::Serialize;
@@ -473,6 +474,18 @@ async fn claude_open() -> CmdResult<bool> {
     blocking(|| Ok(claude::open_app())).await
 }
 
+/// Có bản cài mới hơn bản đang chạy không (sau khi deploy.ps1 cập nhật).
+#[tauri::command]
+fn update_check() -> bool {
+    update::available()
+}
+
+/// Mở bản mới và thoát bản đang chạy.
+#[tauri::command]
+fn update_restart(app: AppHandle) -> CmdResult<()> {
+    update::restart(&app)
+}
+
 /// Mở chat mới trong Claude desktop với lời nhắn điền sẵn (người dùng chỉ bấm Enter).
 #[tauri::command]
 async fn claude_open_chat(prompt: String) -> CmdResult<bool> {
@@ -517,6 +530,7 @@ fn start_watcher(app: &AppHandle, dir: &Path) -> CmdResult<()> {
 }
 
 fn main() {
+    update::init();
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .manage(AppState::default())
@@ -544,6 +558,8 @@ fn main() {
             claude_connect,
             claude_open,
             claude_open_chat,
+            update_check,
+            update_restart,
             claude_message_dismiss,
             speech_cmd::speech_status,
             speech_cmd::speech_install,

@@ -345,6 +345,7 @@ export default function App() {
           </button>
         </nav>
         <div className="spacer" />
+        <UpdateChip />
         <ClaudeChip onClick={() => setClaudeOpen(true)} />
         <button className="icon" title="Hoàn tác (Ctrl+Z)" disabled={!view.can_undo} onClick={undo}>
           <Icon name="undo" />
@@ -498,5 +499,23 @@ function Toasts({ toasts }: { toasts: Toast[] }) {
         </div>
       ))}
     </div>
+  );
+}
+
+// Nút "Có bản mới": hiện khi deploy.ps1 vừa cài bản mới trong lúc app đang mở.
+// Kiểm tra mỗi 30 giây; bấm để mở bản mới (project đã được lưu sẵn).
+function UpdateChip() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const check = () => api.updateCheck().then(setReady).catch(() => {});
+    check();
+    const t = setInterval(check, 30_000);
+    return () => clearInterval(t);
+  }, []);
+  if (!ready) return null;
+  return (
+    <button className="primary" title="Đã có bản vlogcut mới. Bấm để mở lại (project đã được lưu)." onClick={() => api.updateRestart().catch(() => {})}>
+      Có bản mới · Mở lại
+    </button>
   );
 }

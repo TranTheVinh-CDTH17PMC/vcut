@@ -112,11 +112,30 @@ npm run dev
 
 Lần đầu Rust biên dịch nhiều thư viện, mất khoảng 5–10 phút. Các lần sau chỉ vài giây.
 
-**Cách nhanh hơn trên Windows** (bấm đúp file trong thư mục project):
+### Cài app để bấm là dùng (nên làm)
+
+Bấm đúp **`cai-dat-app.bat`** trong thư mục project, một lần duy nhất. Script sẽ:
+
+1. Build bản chạy thật (lần đầu khoảng 10 phút, các lần sau 1–3 phút).
+2. Cài vào `%LOCALAPPDATA%\Programs\vlogcut` và tạo biểu tượng **vlogcut** trên Desktop và menu Start.
+3. Bật **trình tự cập nhật** chạy nền (tự bật mỗi khi mở máy, không có cửa sổ).
+4. Mở app.
+
+Từ đó về sau bạn chỉ cần bấm biểu tượng **vlogcut**: không cần Terminal, không cần build.
+
+**Tự cập nhật khi có code mới:** mỗi lần Claude code xong, Claude chép code vào thư mục project và tạo file `.deploy-request`. Trình tự cập nhật thấy file này sẽ tự build và cài bản mới (cũng cập nhật luôn MCP server cho Claude desktop). Nếu app đang mở, góc trên hiện nút **Có bản mới · Mở lại**: bấm là chuyển sang bản mới, project không mất gì.
+
+- Muốn cập nhật tay: bấm đúp `cap-nhat-app.bat`.
+- Kết quả lần cập nhật gần nhất: `deploy-status.json`, chi tiết ở `deploy-log.txt`.
+- Tắt tự cập nhật: xoá `vlogcut-tu-dong-cap-nhat` trong thư mục Startup (Win+R → `shell:startup`).
+
+### Các file .bat khác
 
 | File | Làm gì |
 |---|---|
-| `chay-app.bat` | Build MCP server rồi mở app ở chế độ dev. Dùng hằng ngày. |
+| `cai-dat-app.bat` | Cài app + biểu tượng + tự cập nhật (xem trên). |
+| `cap-nhat-app.bat` | Build và cài bản mới ngay, rồi mở app. |
+| `chay-app.bat` | Mở app ở chế độ dev (cho người sửa code, có cửa sổ Terminal). |
 | `kiem-tra-build.bat` | Kiểm tra công cụ, cài thư viện, build UI, chạy test lõi, build app + MCP. Kết quả ghi vào `build-log.txt` (xem `TEST_EXIT=0` và `BUILD_EXIT=0` là ổn). |
 
 > Đừng để project trong OneDrive: build sẽ chậm và hay lỗi khoá file.
@@ -363,6 +382,7 @@ Mở app, chọn thư mục vừa tạo.
 | "Không tìm thấy ffmpeg" | `winget install Gyan.FFmpeg`, rồi **tắt hẳn PowerShell và mở lại**. |
 | `link.exe not found` khi build | Thiếu Visual Studio Build Tools, cài lại với workload C++. |
 | Build chậm hoặc lỗi khoá file | Đưa project ra khỏi OneDrive. Tắt app trước khi build lại. |
+| Code mới mà app không cập nhật | Mở `deploy-status.json` xem lỗi. Kiểm tra `deploy-watcher.txt` có giờ mới (trình tự cập nhật đang chạy); nếu không, bấm lại `cai-dat-app.bat`. |
 | Video iPhone (HEVC) không xem trước được | Chờ proxy H.264 tạo xong (tiến độ ở cột trái). |
 | Xuất video chậm | Kiểm tra `ffmpeg -encoders \| findstr nvenc`. Không có NVENC thì app dùng CPU. Cập nhật driver NVIDIA. |
 | Claude không thấy công cụ vlogcut | Bấm lại **Kết nối Claude**, thoát hẳn Claude desktop qua khay hệ thống rồi mở lại. Mở chat **mới** trong Claude desktop. |
