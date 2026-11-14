@@ -331,7 +331,7 @@ export function AutoEdit({ project, analysis, importing, onView, onBuilt, toast 
           <div className="claude-box">
             <span style={{ fontWeight: 600 }}>Dựng bằng Claude</span>
             <span className="small" style={{ lineHeight: 1.5 }}>
-              Bấm nút: lệnh tự copy và Claude desktop bật lên, bạn chỉ cần Ctrl+V rồi Enter. Kết quả hiện thành đề xuất ở tab Dựng thủ công. Claude chỉ xem ảnh thu nhỏ, không xem video gốc.
+              Bấm nút: Claude desktop mở chat mới với lệnh điền sẵn, bạn chỉ cần bấm Enter. Kết quả hiện thành đề xuất ở tab Dựng thủ công. Claude chỉ xem ảnh thu nhỏ, không xem video gốc.
             </span>
             <button className="primary" style={{ background: "#B45309", borderColor: "#B45309" }} disabled={keptCount === 0} onClick={askBuild}>
               Nhờ Claude dựng

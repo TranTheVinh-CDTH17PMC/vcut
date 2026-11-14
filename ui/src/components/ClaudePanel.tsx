@@ -2,7 +2,7 @@
 // nút cho clip đang chọn và ô gõ yêu cầu tự do.
 
 import { useState } from "react";
-import { askClaude } from "../claudeAsk";
+import { askClaude, getAskMode, setAskMode, type AskMode } from "../claudeAsk";
 import { fmtTime, type Span } from "../timeline";
 import type { ClaudeMessage, Project, Selection } from "../types";
 
@@ -30,6 +30,11 @@ interface Props {
 
 export function ClaudePanel({ project, layout, selection, message, onDismissMessage, toast }: Props) {
   const [text, setText] = useState("");
+  const [mode, setMode] = useState<AskMode>(getAskMode);
+  const changeMode = (m: AskMode) => {
+    setMode(m);
+    setAskMode(m);
+  };
 
   // Mô tả đối tượng đang chọn để Claude biết "clip này" là clip nào.
   let target = "";
@@ -68,8 +73,20 @@ export function ClaudePanel({ project, layout, selection, message, onDismissMess
     <div className="claude-panel">
       <div className="row between">
         <strong>Nhờ Claude</strong>
-        <span className="muted small">qua Claude desktop</span>
+        <div className="seg" title="Chat mới: lệnh điền sẵn, chỉ bấm Enter. Chat đang mở: copy lệnh để dán vào chat cũ (Claude nhớ ngữ cảnh).">
+          <button className={mode === "new" ? "on" : ""} onClick={() => changeMode("new")}>
+            Chat mới
+          </button>
+          <button className={mode === "copy" ? "on" : ""} onClick={() => changeMode("copy")}>
+            Chat đang mở
+          </button>
+        </div>
       </div>
+      <span className="muted small">
+        {mode === "new"
+          ? "Bấm nút → Claude desktop mở chat mới, lệnh điền sẵn → bấm Enter."
+          : "Bấm nút → lệnh được copy → dán vào chat đang mở (Ctrl+V, Enter)."}
+      </span>
 
       {message && (
         <div className="claude-msg">

@@ -120,6 +120,67 @@ pub fn connect() -> Result<ClaudeStatus, String> {
 /// 2. Chạy thẳng file claude.exe ở vị trí cài mặc định (nếu đang chạy, Claude tự
 ///    chuyển cửa sổ đang mở lên trước thay vì mở cửa sổ mới).
 /// Trả về `true` nếu đã gửi được lệnh mở.
+/// Mở một chat mới trong Claude desktop với lời nhắn điền sẵn, qua link chính thức
+/// `claude://claude.ai/new?q=...`. Claude desktop chỉ điền vào ô nhập, người dùng
+/// tự bấm Enter để gửi (Claude không tự gửi lệnh từ link — đó là cơ chế an toàn).
+///
+/// `prompt` là văn bản thường; hàm tự mã hoá URL. Trả `false` nếu không mở được
+/// (vd. Claude desktop chưa cài) để giao diện chuyển sang cách copy.
+pub fn open_chat(prompt: &str) -> bool {
+    // Claude cắt `q` ở khoảng 14.000 ký tự; giữ an toàn ở 6.000 ký tự gốc.
+    let text: String = prompt.chars().take(6000).collect();
+    let url = format!("claude://claude.ai/new?q={}", encode_query(&text));
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        // Dùng rundll32 + FileProtocolHandler thay vì `cmd /C start`: cmd sẽ hiểu sai
+        // các ký tự `%` và `&` trong URL, còn rundll32 chuyển nguyên chuỗi cho Windows.
+        std::process::Command::new("rundll32.exe")
+            .args(["url.dll,FileProtocolHandler", &url])
+            .creation_flags(CREATE_NO_WINDOW)
+            .status()
+            .map(|s| s.success())
+            .unwrap_or(false)
+    }
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open").arg(&url).status().map(|s| s.success()).unwrap_or(false)
+    }
+    #[cfg(not(any(windows, target_os = "macos")))]
+    {
+        let _ = url;
+        false
+    }
+}
+
+/// Mã hoá phần trăm (percent-encoding) cho tham số URL: chữ/số ASCII và `-_.~`
+/// giữ nguyên, mọi byte UTF-8 khác (kể cả chữ có dấu tiếng Việt) thành `%XX`.
+/// Ví dụ "Dựng vlog" → "D%E1%BB%B1ng%20vlog".
+fn encode_query(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() * 3);
+    // `bytes()` duyệt từng byte UTF-8 — một chữ "ự" là 3 byte nên thành 3 nhóm %XX.
+    for b in s.bytes() {
+        match b {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => out.push(b as char),
+            _ => out.push_str(&format!("%{b:02X}")),
+        }
+    }
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::encode_query;
+
+    #[test]
+    fn encodes_vietnamese_and_reserved_chars() {
+        assert_eq!(encode_query("Dựng vlog"), "D%E1%BB%B1ng%20vlog");
+        assert_eq!(encode_query("a&b=c?%"), "a%26b%3Dc%3F%25");
+        assert_eq!(encode_query("[vlogcut] ok"), "%5Bvlogcut%5D%20ok");
+    }
+}
+
 pub fn open_app() -> bool {
     #[cfg(windows)]
     {

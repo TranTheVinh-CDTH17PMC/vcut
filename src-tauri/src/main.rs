@@ -473,6 +473,12 @@ async fn claude_open() -> CmdResult<bool> {
     blocking(|| Ok(claude::open_app())).await
 }
 
+/// Mở chat mới trong Claude desktop với lời nhắn điền sẵn (người dùng chỉ bấm Enter).
+#[tauri::command]
+async fn claude_open_chat(prompt: String) -> CmdResult<bool> {
+    blocking(move || Ok(claude::open_chat(&prompt))).await
+}
+
 #[tauri::command]
 async fn claude_message_dismiss(app: AppHandle) -> CmdResult<ProjectView> {
     let dir = current_dir(&app)?;
@@ -537,6 +543,7 @@ fn main() {
             claude_status,
             claude_connect,
             claude_open,
+            claude_open_chat,
             claude_message_dismiss,
             speech_cmd::speech_status,
             speech_cmd::speech_install,

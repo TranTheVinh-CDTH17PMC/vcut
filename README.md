@@ -194,10 +194,12 @@ Bạn ở trong vlogcut là chính:
    - Chung: *Dựng vlog*, *Review & sửa*, *Khớp nhịp nhạc*, *Mở đầu hay hơn*.
    - Theo clip đang chọn: *Ấn tượng hơn*, *Cắt gọn*, *Đổi cảnh khác*.
    - Hoặc gõ yêu cầu tự do vào ô rồi **Gửi**.
-2. Claude desktop tự bật lên, lệnh (bắt đầu bằng `[vlogcut]`) đã copy sẵn: bấm **Ctrl+V** rồi **Enter**. Lần đầu Claude hỏi quyền dùng công cụ: chọn *Allow always*.
+2. Claude desktop tự mở **chat mới** với lệnh (bắt đầu bằng `[vlogcut]`) đã điền sẵn trong ô nhập: chỉ cần bấm **Enter**. Lần đầu Claude hỏi quyền dùng công cụ: chọn *Allow always*.
+   - Muốn hỏi tiếp trong chat đang mở (để Claude nhớ ngữ cảnh): chọn **Chat đang mở** ở góc panel Nhờ Claude. Khi đó lệnh được copy, bạn dán vào chat cũ bằng **Ctrl+V** rồi **Enter**.
+   - Claude desktop không cho tự gửi lệnh từ bên ngoài, nên bước bấm Enter là của bạn.
 3. Quay lại vlogcut: app tự chuyển về tab Dựng thủ công. Nhận xét của Claude hiện ở panel Nhờ Claude, đề xuất hiện ở khung phía trên → **Áp dụng** hoặc **Bỏ qua**. Ctrl+Z để hoàn tác.
 
-Mẹo: giữ **một cuộc trò chuyện Claude cho mỗi video** để Claude nhớ ngữ cảnh.
+Mẹo: mỗi lần mở chat mới Claude vẫn đọc lại toàn bộ project qua công cụ, nên không mất dữ liệu. Chỉ dùng **Chat đang mở** khi muốn nối tiếp một trao đổi dài.
 
 ### 5.3. Ví dụ yêu cầu
 
@@ -364,6 +366,7 @@ Mở app, chọn thư mục vừa tạo.
 | Video iPhone (HEVC) không xem trước được | Chờ proxy H.264 tạo xong (tiến độ ở cột trái). |
 | Xuất video chậm | Kiểm tra `ffmpeg -encoders \| findstr nvenc`. Không có NVENC thì app dùng CPU. Cập nhật driver NVIDIA. |
 | Claude không thấy công cụ vlogcut | Bấm lại **Kết nối Claude**, thoát hẳn Claude desktop qua khay hệ thống rồi mở lại. Mở chat **mới** trong Claude desktop. |
+| Bấm nút mà Claude desktop không mở chat mới | Cập nhật Claude desktop lên bản mới. App tự chuyển sang cách copy: dán bằng Ctrl+V. |
 | Dán lệnh `[vlogcut]` mà Claude không làm gì | Phải dán vào **Claude desktop** trên máy có vlogcut, không phải claude.ai trên web hay app khác. |
 | Đề xuất báo lỗi "revision" | Project vừa thay đổi sau khi Claude đọc. Bảo Claude đọc lại timeline rồi đề xuất lại. |
 | Tải Whisper thất bại | Kiểm tra mạng (cần truy cập github.com và huggingface.co), bấm tải lại. File tải dở có đuôi `.part` sẽ được ghi đè. |

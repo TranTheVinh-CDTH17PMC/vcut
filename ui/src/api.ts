@@ -28,6 +28,7 @@ export const api = {
   claudeStatus: () => invoke<ClaudeStatus>("claude_status"),
   claudeConnect: () => invoke<ClaudeStatus>("claude_connect"),
   claudeOpen: () => invoke<boolean>("claude_open"),
+  claudeOpenChat: (prompt: string) => invoke<boolean>("claude_open_chat", { prompt }),
   claudeMessageDismiss: () => invoke<ProjectView>("claude_message_dismiss"),
   speechStatus: () => invoke<SpeechStatus>("speech_status"),
   speechInstall: () => invoke<void>("speech_install"),
