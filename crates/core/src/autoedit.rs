@@ -8,6 +8,10 @@
 use crate::ops::{self, Op};
 use crate::presets::FilterPreset;
 use crate::project::{MediaKind, Project, TransitionKind};
+
+fn tr(id: &str) -> TransitionKind {
+    TransitionKind::from_id(id).unwrap_or_default()
+}
 use crate::store::Brief;
 use serde_json::json;
 
@@ -22,9 +26,9 @@ struct Style {
 fn style(mood: &str) -> Style {
     match mood {
         "hype" => Style { clip: 1.3, preset: FilterPreset::Vivid, transition: None },
-        "emotional" => Style { clip: 3.5, preset: FilterPreset::Warm, transition: Some((TransitionKind::Fade, 0.7)) },
-        "fun" => Style { clip: 1.8, preset: FilterPreset::Vivid, transition: Some((TransitionKind::SlideLeft, 0.3)) },
-        _ => Style { clip: 2.6, preset: FilterPreset::Cinematic, transition: Some((TransitionKind::Dissolve, 0.4)) },
+        "emotional" => Style { clip: 3.5, preset: FilterPreset::Warm, transition: Some((tr("fade"), 0.7)) },
+        "fun" => Style { clip: 1.8, preset: FilterPreset::Vivid, transition: Some((tr("whip_left"), 0.3)) },
+        _ => Style { clip: 2.6, preset: FilterPreset::Cinematic, transition: Some((tr("dissolve"), 0.4)) },
     }
 }
 

@@ -44,7 +44,7 @@ Ba cách dựng, cùng một timeline:
 **Hiệu ứng**
 - Filter màu: Cinematic, Vintage, Lạnh, Ấm, Đen trắng, Rực rỡ + chỉnh sáng/tương phản/bão hoà.
 - Motion blur, tốc độ 0.25–4×, Ken Burns (zoom chậm).
-- 8 kiểu chuyển cảnh: mờ dần, hoà tan, loé trắng, trượt trái/phải, quét, mở tròn, phóng to.
+- **68 kiểu chuyển cảnh** chia 6 nhóm như CapCut: *Động* (zoom xuyên, xoay, rung, lia nhanh 4 hướng, nhiễu sóng, chớp sáng), *Cơ bản* (mờ dần, hoà tan, qua màn đen/trắng…), *Trượt*, *Quét*, *Hình* (mở/đóng tròn, khung vuông…), *Hiệu ứng* (vỡ điểm ảnh, cắt lát, gió…). Rê chuột để xem thử, xem trước ngay trên khung hình, nút *Áp dụng cho mọi clip*.
 - Chữ có hiệu ứng vào (mờ dần, trượt lên, bật), viền, màu, vị trí.
 - Nhạc nền có fade vào/ra và **tự nhỏ lại khi có tiếng nói** (ducking).
 - **Keyframe** cho vị trí, zoom, xoay, độ mờ, màu, âm lượng. Hiện tạo qua nút Ken Burns hoặc nhờ Claude ("zoom chậm vào từ giây 2 đến 4", "nhạc nhỏ dần ở cuối"); giao diện chỉnh keyframe chi tiết ở bản sau.

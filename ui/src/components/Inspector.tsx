@@ -5,22 +5,25 @@ import { useEffect, useState } from "react";
 import { fileUrl } from "../api";
 import { isAnimated, numAt } from "../keyframe";
 import { ASPECTS, clipDuration, type Span } from "../timeline";
-import type { Animatable, AudioClip, Op, PresetInfo, Project, Selection, TextClip, TransitionKind, VideoClip } from "../types";
+import type { Animatable, AudioClip, Op, PresetInfo, Project, Selection, TextClip, TransitionInfo, VideoClip } from "../types";
+import { TransitionPicker } from "./TransitionPicker";
 
 interface Props {
   project: Project;
   layout: Span[];
   selection: Selection;
   presets: PresetInfo[];
+  transitions: TransitionInfo[];
+  transitionGroups: string[];
   time: number;
   apply: (ops: Op[]) => void;
   onPreviewClip: (clipId: string) => void;
 }
 
-export function Inspector({ project, layout, selection, presets, time, apply, onPreviewClip }: Props) {
+export function Inspector({ project, layout, selection, presets, transitions, transitionGroups, time, apply, onPreviewClip }: Props) {
   if (selection?.kind === "clip") {
     const i = project.video.findIndex((c) => c.id === selection.id);
-    if (i >= 0) return <ClipPanel key={selection.id} project={project} clip={project.video[i]} index={i} span={layout[i]} presets={presets} time={time} apply={apply} onPreview={onPreviewClip} />;
+    if (i >= 0) return <ClipPanel key={selection.id} project={project} clip={project.video[i]} index={i} span={layout[i]} presets={presets} transitions={transitions} transitionGroups={transitionGroups} time={time} apply={apply} onPreview={onPreviewClip} />;
   }
   if (selection?.kind === "text") {
     const t = project.texts.find((x) => x.id === selection.id);
@@ -84,24 +87,15 @@ function AnimNote({ anim, onClear }: { anim: Animatable<unknown>; onClear: () =>
   );
 }
 
-const TRANSITIONS: { id: TransitionKind | "none"; label: string }[] = [
-  { id: "none", label: "Không" },
-  { id: "fade", label: "Mờ dần" },
-  { id: "dissolve", label: "Hoà tan" },
-  { id: "fade_white", label: "Flash trắng" },
-  { id: "slide_left", label: "Trượt trái" },
-  { id: "slide_right", label: "Trượt phải" },
-  { id: "wipe_left", label: "Quét trái" },
-  { id: "circle_open", label: "Vòng tròn mở" },
-  { id: "zoom_in", label: "Phóng to" },
-];
 
-function ClipPanel({ project, clip, index, span, presets, time, apply, onPreview }: {
+function ClipPanel({ project, clip, index, span, presets, transitions, transitionGroups, time, apply, onPreview }: {
   project: Project;
   clip: VideoClip;
   index: number;
   span: Span;
   presets: PresetInfo[];
+  transitions: TransitionInfo[];
+  transitionGroups: string[];
   time: number;
   apply: (ops: Op[]) => void;
   onPreview: (id: string) => void;
@@ -190,28 +184,20 @@ function ClipPanel({ project, clip, index, span, presets, time, apply, onPreview
               ))}
             </select>
           </label>
-          {index > 0 && (
-            <label className="field" style={{ flex: 1 }}>
-              Chuyển cảnh vào
-              <select
-                value={clip.transition_in?.kind ?? "none"}
-                onChange={(e) =>
-                  e.target.value === "none"
-                    ? set({ remove_transition: true })
-                    : set({ transition_in: { kind: e.target.value, duration: clip.transition_in?.duration ?? 0.5 } })
-                }
-              >
-                {TRANSITIONS.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
         </div>
-        {index > 0 && clip.transition_in && (
-          <Slider label="Thời lượng chuyển cảnh" value={clip.transition_in.duration} min={0.1} max={2} step={0.05} format={(v) => `${v.toFixed(2)}s`} onCommit={(v) => set({ transition_in: { kind: clip.transition_in!.kind, duration: v } })} />
+        {index > 0 && (
+          <TransitionPicker
+            list={transitions}
+            groups={transitionGroups}
+            value={clip.transition_in?.kind ?? null}
+            duration={clip.transition_in?.duration ?? 0.5}
+            onPick={(id) => (id ? set({ transition_in: { kind: id, duration: clip.transition_in?.duration ?? 0.5 } }) : set({ remove_transition: true }))}
+            onDuration={(v) => clip.transition_in && set({ transition_in: { kind: clip.transition_in.kind, duration: v } })}
+            onApplyAll={() =>
+              clip.transition_in &&
+              apply(project.video.slice(1).map((c) => ({ op: "set_clip_props", clip_id: c.id, transition_in: { ...clip.transition_in! } })))
+            }
+          />
         )}
         {media?.has_audio && (
           <>

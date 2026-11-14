@@ -73,15 +73,14 @@ export interface MediaItem {
 }
 
 export type FilterPreset = "none" | "cinematic" | "vintage" | "cool" | "warm" | "black_white" | "vivid";
-export type TransitionKind =
-  | "fade"
-  | "dissolve"
-  | "fade_white"
-  | "slide_left"
-  | "slide_right"
-  | "wipe_left"
-  | "circle_open"
-  | "zoom_in";
+/** id trong bảng chuyển cảnh (crates/core/src/transitions.rs), vd. "fade", "spin". */
+export type TransitionKind = string;
+
+export interface TransitionInfo {
+  id: string;
+  name: string;
+  group: string;
+}
 
 export interface Transition {
   kind: TransitionKind;
@@ -212,6 +211,8 @@ export interface PresetInfo {
 export interface AppInfo {
   ffmpeg: { found: boolean; version: string; encoder: "nvenc" | "x264" };
   presets: PresetInfo[];
+  transitions: TransitionInfo[];
+  transition_groups: string[];
   last_project?: string | null;
 }
 

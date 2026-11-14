@@ -5,7 +5,8 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { fileUrl } from "../api";
 import { numAt, vecAt } from "../keyframe";
 import { clipIndexAt, type Span } from "../timeline";
-import type { AudioClip, PresetInfo, Project, TextClip, VideoClip } from "../types";
+import { mergeStyle, transitionStyles } from "../transitionPreview";
+import type { AudioClip, PresetInfo, Project, TextClip, TransitionInfo, VideoClip } from "../types";
 
 interface Props {
   project: Project;
@@ -13,6 +14,7 @@ interface Props {
   time: number;
   playing: boolean;
   presets: PresetInfo[];
+  transitions?: TransitionInfo[];
   selectedClipId: string | null;
 }
 
@@ -37,7 +39,13 @@ export function Preview({ project, layout, time, playing, presets }: Props) {
 
   let idx = clipIndexAt(layout, time);
   if (idx < 0 && layout.length && time > 0) idx = layout.length - 1;
-  const visible = [idx, idx + 1].filter((i) => i >= 0 && i < project.video.length);
+  // Đang trong đoạn chuyển cảnh: clip trước (idx-1) và clip sau (idx) cùng hiện và cùng chạy.
+  const trDur = idx > 0 ? layout[idx].transition : 0;
+  const inTr = trDur > 0 && time < layout[idx].start + trDur;
+  const trP = inTr ? (time - layout[idx].start) / trDur : 1;
+  const trSt = inTr ? transitionStyles(project.video[idx].transition_in?.kind ?? "fade", trP) : null;
+  const playingSet = inTr ? [idx - 1, idx] : [idx];
+  const visible = [inTr ? idx - 1 : -1, idx, idx + 1].filter((i) => i >= 0 && i < project.video.length);
   const videoRefs = useRef(new Map<string, HTMLVideoElement>());
   const audioRefs = useRef(new Map<string, HTMLAudioElement>());
 
@@ -47,7 +55,7 @@ export function Preview({ project, layout, time, playing, presets }: Props) {
       const clip = project.video[i];
       const el = videoRefs.current.get(clip.id);
       if (!el) return;
-      const active = i === idx;
+      const active = playingSet.includes(i);
       if (!active) {
         el.pause();
         if (Math.abs(el.currentTime - clip.src_in) > 0.05) el.currentTime = clip.src_in;
@@ -114,7 +122,11 @@ export function Preview({ project, layout, time, playing, presets }: Props) {
           const media = project.media.find((m) => m.id === clip.media_id);
           if (!media) return null;
           const local = Math.max(0, time - layout[i].start);
-          const style: CSSProperties = { ...clipStyle(clip, local, presetCss(clip.color.preset)), visibility: i === idx ? "visible" : "hidden" };
+          const tr = trSt ? (i === idx ? trSt.in : i === idx - 1 ? trSt.out : undefined) : undefined;
+          const style: CSSProperties = mergeStyle(
+            { ...clipStyle(clip, local, presetCss(clip.color.preset)), visibility: playingSet.includes(i) ? "visible" : "hidden" },
+            tr,
+          );
           if (media.kind === "image") {
             return <img key={clip.id} className="layer" src={fileUrl(media.path)} style={style} draggable={false} />;
           }

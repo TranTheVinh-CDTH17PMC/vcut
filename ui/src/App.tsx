@@ -379,6 +379,7 @@ export default function App() {
                 time={time}
                 playing={playing}
                 presets={info?.presets ?? []}
+                transitions={info?.transitions ?? []}
                 selectedClipId={selection?.kind === "clip" ? selection.id : null}
               />
               <div className="transport">
@@ -423,6 +424,8 @@ export default function App() {
                 layout={layout}
                 selection={selection}
                 presets={info?.presets ?? []}
+                transitions={info?.transitions ?? []}
+                transitionGroups={info?.transition_groups ?? []}
                 time={time}
                 apply={apply}
                 onPreviewClip={previewClip}

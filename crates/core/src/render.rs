@@ -12,6 +12,7 @@ use crate::ffmpeg::{self, command, ffmpeg_bin, Encoder};
 use crate::keyframe::{ffmpeg_expr, fmt_num, Animatable, Vec2};
 use crate::project::*;
 use crate::store::data_dir;
+use crate::transitions::{motion_filters, Side};
 use std::fmt::Write as _;
 use std::io::{BufRead, BufReader, Read};
 use std::path::{Path, PathBuf};
@@ -75,6 +76,20 @@ pub fn build_plan(p: &Project) -> Result<Plan> {
             "format=yuv420p,tpad=stop_mode=clone:stop_duration=1,trim=duration={},setpts=PTS-STARTPTS,fps={fps},settb=AVTB",
             fmt_num(dur)
         ));
+        // Chuyển động kiểu CapCut ở đầu clip (chuyển cảnh vào) và cuối clip (chuyển cảnh ra).
+        let mut motion = Vec::new();
+        if let Some(t) = clip.transition_in.filter(|_| layout[i].transition > 0.0) {
+            motion.extend(motion_filters(t.kind.motion(), Side::Head, dur, layout[i].transition, w, h, fps));
+        }
+        if let Some(next) = p.video.get(i + 1) {
+            if let Some(t) = next.transition_in.filter(|_| layout[i + 1].transition > 0.0) {
+                motion.extend(motion_filters(t.kind.motion(), Side::Tail, dur, layout[i + 1].transition, w, h, fps));
+            }
+        }
+        if !motion.is_empty() {
+            chain.extend(motion);
+            chain.push(format!("format=yuv420p,fps={fps},settb=AVTB"));
+        }
         writeln!(g, "[{k}:v]{}[v{i}];", chain.join(",")).unwrap();
 
         // Âm thanh của clip

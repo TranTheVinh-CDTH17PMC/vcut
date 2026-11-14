@@ -95,6 +95,7 @@ App ghi `%APPDATA%/vlogcut/current.json` trỏ tới project đang mở để MC
 - Mỗi clip là một input với `-ss`/`-t`; filter: tốc độ (`setpts`, `atempo`), scale+crop theo khung, filter màu (`eq`, `colorbalance`, `curves`, `hue`), motion blur (`tmix`), zoom.
 - Keyframe → biểu thức FFmpeg theo thời gian `t` (hàm từng đoạn, dựng bằng `if(lt(t,…),…)`): `scale`/`crop`/`overlay` cho vị trí và zoom, `rotate` cho xoay, `eq` với `eval=frame` cho màu, `volume` với `eval=frame` cho âm lượng, `colorchannelmixer`/`fade` cho opacity. Biểu thức dài ghi vào file script cùng filtergraph.
 - Nối clip: `xfade` + `acrossfade` khi có chuyển cảnh, `concat` khi không.
+- Chuyển cảnh: bảng duy nhất `crates/core/src/transitions.rs` (68 kiểu, 6 nhóm; dùng cho render, app qua `app_info`, Claude qua `INSTRUCTIONS`). Nhóm "Động" kiểu CapCut = xfade gốc + chuyển động ở cuối clip trước/đầu clip sau (`motion_filters`): zoom/rung bằng `scale` eval=frame + `crop` (không dùng `zoompan`: chậm ~40×), xoay `rotate`, lia `avgblur`, nhiễu `rgbashift`+`noise`, chớp `eq`. Không dùng xfade custom expr (tính từng điểm ảnh, quá chậm). App xem trước bằng CSS gần đúng (`ui/src/transitionPreview.ts`).
 - Chữ: xuất file `.ass`, dùng filter `ass` với ffmpeg chạy trong thư mục tạm (tránh lỗi escape đường dẫn Windows).
 - Nhạc: `sidechaincompress` để ducking, `amix`, `afade`.
 - Filtergraph ghi ra file script (tránh giới hạn độ dài dòng lệnh Windows). Tiến độ qua `-progress pipe:1`.

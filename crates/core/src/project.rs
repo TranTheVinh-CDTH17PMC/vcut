@@ -211,35 +211,8 @@ impl Scene {
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
-#[serde(rename_all = "snake_case")]
-pub enum TransitionKind {
-    #[default]
-    Fade,
-    Dissolve,
-    FadeWhite,
-    SlideLeft,
-    SlideRight,
-    WipeLeft,
-    CircleOpen,
-    ZoomIn,
-}
-
-impl TransitionKind {
-    /// Tên tương ứng trong filter `xfade` của FFmpeg.
-    pub fn xfade_name(self) -> &'static str {
-        match self {
-            TransitionKind::Fade => "fade",
-            TransitionKind::Dissolve => "dissolve",
-            TransitionKind::FadeWhite => "fadewhite",
-            TransitionKind::SlideLeft => "slideleft",
-            TransitionKind::SlideRight => "slideright",
-            TransitionKind::WipeLeft => "wipeleft",
-            TransitionKind::CircleOpen => "circleopen",
-            TransitionKind::ZoomIn => "zoomin",
-        }
-    }
-}
+// Kiểu chuyển cảnh: xem bảng trong `transitions.rs`.
+pub use crate::transitions::TransitionKind;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub struct Transition {

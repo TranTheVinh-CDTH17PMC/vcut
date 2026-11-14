@@ -28,5 +28,6 @@ pub mod render;
 pub mod review;
 pub mod speech;
 pub mod store;
+pub mod transitions;
 
 pub use error::{CoreError, Result};

@@ -88,3 +88,51 @@ fn xuat_video_day_du_hieu_ung() {
     let prev = render::render_clip_preview(dir, &c.project, "c1", &AtomicBool::new(false), &mut |_| {}).unwrap();
     assert!(prev.exists());
 }
+
+/// Xuất một video có đủ 10 kiểu chuyển cảnh "Động" (xoay, zoom xuyên, rung, lia, nhiễu,
+/// chớp sáng). Đặt biến môi trường VLOGCUT_KEEP=<thư mục> để giữ lại file xem thử.
+#[test]
+fn xuat_chuyen_canh_dong() {
+    if !ffmpeg_ok() {
+        eprintln!("bỏ qua: không có ffmpeg");
+        return;
+    }
+    let tmp = tempfile::tempdir().unwrap();
+    let dir = tmp.path();
+    let src = dir.join("src");
+    std::fs::create_dir_all(&src).unwrap();
+    gen(&src, "a.mp4", &["-f", "lavfi", "-i", "testsrc=s=1280x720:r=30:d=20", "-c:v", "libx264", "-pix_fmt", "yuv420p"]);
+    store::create(dir, "dong").unwrap();
+    let mut m = media::probe(&src.join("a.mp4")).unwrap();
+    m.thumb = media::make_thumbnail(dir, &m).unwrap();
+    let p = store::upsert_media(dir, vec![m]).unwrap();
+    let mid = p.media[0].id.clone();
+
+    let kinds = ["zoom_through", "spin", "spin_ccw", "shake", "whip_left", "whip_right", "whip_up", "whip_down", "glitch", "flash"];
+    let mut ops: Vec<serde_json::Value> = Vec::new();
+    for i in 0..=kinds.len() {
+        let s = i as f64 * 1.6;
+        ops.push(serde_json::json!({"op":"add_clip","media_id":mid,"src_in":s,"src_out":s + 1.6,"id":format!("c{i}")}));
+        if i > 0 {
+            ops.push(serde_json::json!({"op":"set_clip_props","clip_id":format!("c{i}"),"transition_in":{"kind":kinds[i-1],"duration":0.5}}));
+        }
+    }
+    let ops: Vec<Op> = serde_json::from_value(serde_json::Value::Array(ops)).unwrap();
+    let c = store::commit(dir, &ops, None).unwrap();
+    let plan = render::build_plan(&c.project).unwrap();
+    assert!(plan.graph.contains("rotate=") && plan.graph.contains("avgblur=") && plan.graph.contains("rgbashift="));
+
+    if let Ok(keep) = std::env::var("VLOGCUT_KEEP") {
+        std::fs::write(Path::new(&keep).join("graph.txt"), &plan.graph).unwrap();
+        std::fs::write(Path::new(&keep).join("inputs.txt"), format!("{:?}", plan.inputs)).unwrap();
+    }
+    let out = dir.join("dong.mp4");
+    let t0 = std::time::Instant::now();
+    render::render(dir, &c.project, &render::RenderOptions { out_path: out.clone(), fast: true, encoder: None }, &AtomicBool::new(false), &mut |_| {}).unwrap();
+    eprintln!("render {:.1}s cho {:.1}s video", t0.elapsed().as_secs_f64(), c.project.duration());
+    let probed = media::probe(&out).unwrap();
+    assert!((probed.duration - c.project.duration()).abs() < 0.15, "dài {} thay vì {}", probed.duration, c.project.duration());
+    if let Ok(keep) = std::env::var("VLOGCUT_KEEP") {
+        std::fs::copy(&out, Path::new(&keep).join("dong.mp4")).unwrap();
+    }
+}

@@ -40,8 +40,11 @@ OPS (JSON objects with an "op" field):
 - {"op":"add_clip","media_id":"...","src_in":12.5,"src_out":15.0,"id":"c1","index":null}   src_in/src_out are seconds in the SOURCE file (use a scene's start/end range). Images: src_in 0, src_out = display seconds. Clips play back to back on one video track. Give your own short ids so later ops can reference them.
 - {"op":"remove_clip","clip_id":"..."} / {"op":"move_clip","clip_id":"...","to_index":0}
 - {"op":"trim_clip","clip_id":"...","src_in":..,"src_out":..} / {"op":"split_clip","clip_id":"...","at":2.0}  (at = seconds from clip start)
-- {"op":"set_clip_props","clip_id":"...", any of: "speed":0.25-4, "preset":"none|cinematic|vintage|cool|warm|black_white|vivid", "brightness":-1..1, "contrast":0..2, "saturation":0..3, "scale":0.1-5, "rotation":deg, "opacity":0..1, "position":{"x":0,"y":0}, "volume":0..4, "motion_blur":0-16 (frames, 3-6 typical for fast motion), "transition_in":{"kind":"fade|dissolve|fade_white|slide_left|slide_right|wipe_left|circle_open|zoom_in","duration":0.05-3}, "remove_transition":true}
+- {"op":"set_clip_props","clip_id":"...", any of: "speed":0.25-4, "preset":"none|cinematic|vintage|cool|warm|black_white|vivid", "brightness":-1..1, "contrast":0..2, "saturation":0..3, "scale":0.1-5, "rotation":deg, "opacity":0..1, "position":{"x":0,"y":0}, "volume":0..4, "motion_blur":0-16 (frames, 3-6 typical for fast motion), "transition_in":{"kind":"<transition id, see TRANSITIONS below>","duration":0.05-3}, "remove_transition":true}
   A transition overlaps the previous clip, so the timeline gets shorter by its duration. The first clip cannot have transition_in.
+  TRANSITIONS (id: Vietnamese name), by group:
+{TRANSITIONS}
+  The "Động" group are CapCut-style moves (zoom_through, spin, shake, whip_*, glitch, flash): energetic, best 0.3-0.6 s on a music beat; use them sparingly (2-4 per minute) and mix with calm ones (fade, dissolve, smooth_*) for emotional moods.
 - {"op":"set_keyframes","target":{"kind":"clip|text|audio","id":"..."},"property":"scale|position|rotation|opacity|brightness|contrast|saturation|volume","keyframes":[{"t":0,"value":1,"easing":"ease_in_out"},{"t":3,"value":1.2}]}
   t = seconds FROM THE START OF THAT CLIP (not timeline time). position value = {"x":..,"y":..} as a fraction of the frame (0,0 = centered; x 0.1 = shift right 10%). easing: linear|ease_in|ease_out|ease_in_out|hold. Text supports position (x,y in 0..1 of frame, center of text), scale, opacity. Audio supports volume.
   Ken Burns: scale 1 -> 1.15 over the clip with ease_in_out.
@@ -566,8 +569,19 @@ impl ServerHandler for Server {
     fn get_info(&self) -> ServerConfig {
         ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_server_info(Implementation::new("vlogcut", env!("CARGO_PKG_VERSION")))
-            .with_instructions(INSTRUCTIONS)
+            .with_instructions(instructions())
     }
+}
+
+/// Hướng dẫn gửi Claude, chèn danh sách chuyển cảnh lấy từ bảng trong core
+/// (để thêm kiểu mới ở core là Claude biết ngay, không phải sửa chữ ở đây).
+fn instructions() -> String {
+    let mut list = String::new();
+    for g in vlogcut_core::transitions::GROUPS {
+        let items: Vec<String> = vlogcut_core::transitions::ALL.iter().filter(|t| t.group == *g).map(|t| format!("{}: {}", t.id, t.name)).collect();
+        list.push_str(&format!("  - {g}: {}\n", items.join("; ")));
+    }
+    INSTRUCTIONS.replace("{TRANSITIONS}\n", &list)
 }
 
 #[tokio::main]
@@ -582,5 +596,15 @@ async fn main() {
     };
     if let Err(e) = service.waiting().await {
         eprintln!("MCP server dừng: {e}");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn instructions_list_transitions() {
+        let s = super::instructions();
+        assert!(!s.contains("{TRANSITIONS}"));
+        assert!(s.contains("zoom_through: Zoom xuyên") && s.contains("- Trượt: slide_left: Trượt trái"));
     }
 }

@@ -92,6 +92,9 @@ where
 struct AppInfo {
     ffmpeg: ffmpeg::FfmpegInfo,
     presets: Vec<vlogcut_core::presets::PresetInfo>,
+    /// Bảng chuyển cảnh (id, tên, nhóm) cho giao diện.
+    transitions: &'static [vlogcut_core::transitions::TransitionInfo],
+    transition_groups: &'static [&'static str],
     last_project: Option<String>,
 }
 
@@ -101,6 +104,8 @@ async fn app_info() -> CmdResult<AppInfo> {
         Ok(AppInfo {
             ffmpeg: ffmpeg::info(),
             presets: FilterPreset::all_info(),
+            transitions: vlogcut_core::transitions::ALL,
+            transition_groups: vlogcut_core::transitions::GROUPS,
             last_project: store::get_current().filter(|p| p.join(store::PROJECT_FILE).exists()).map(|p| p.to_string_lossy().to_string()),
         })
     })
